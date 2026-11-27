@@ -1072,6 +1072,41 @@
       html { scroll-behavior: auto; }
       *, *:before, *:after { transition: none !important; }
     }
+    .lumen-trigger {
+      background: #ebc8d6;
+      color: #253140;
+      border: 1px solid #f5dce6;
+      min-height: 46px;
+      justify-content: center;
+    }
+    .lumen-trigger:hover { background: #f5dce6; }
+    #main-nav .lumen-nav { color: #edc6d6; }
+    .lumen-dialog {
+      width: min(34rem, calc(100% - 2rem));
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow: auto;
+      margin: auto;
+      background: #fcf2f5;
+      color: #233643;
+      border: 1px solid #cda3b4;
+      border-radius: 18px;
+      padding: clamp(20px, 5vw, 38px);
+      box-shadow: 0 20px 80px #101e2940;
+    }
+    .lumen-dialog::backdrop { background: #101e29ba; }
+    .lumen-dialog .intro { padding: 0; background: transparent; }
+    .lumen-dialog .intro-grid { display: block; width: 100%; padding: 0; }
+    .lumen-dialog .intro-art { display: none; }
+    .lumen-dialog .intro-copy p:not(.eyebrow) { font-size: 1rem; line-height: 1.6; }
+    .lumen-dialog .intro-copy h2 { font-size: clamp(2rem, 6vw, 3rem); }
+    .lumen-dialog form { text-align: right; }
+    .lumen-dialog button {
+      min-height: 44px; padding: 0 16px; background: #efd5e0; color: #352833;
+      border: 0; border-radius: 24px; cursor: pointer; font: inherit;
+    }
+    body:has(.lumen-dialog[open]) { overflow: hidden; }
+
   </style>
 </head>
 
@@ -1086,7 +1121,7 @@
       </a>
 
       <nav aria-label="Ana menü" id="main-nav">
-        <a href="#lumen">Lumen’i tanı</a>
+        <a class="lumen-nav" href="#lumen">Lumen’i tanı</a>
         <a href="#danismanlik">Danışmanlık</a>
         <a href="#sorular">Merak edilenler</a>
         <a class="nav-contact"
@@ -1132,12 +1167,7 @@
           </p>
 
           <div class="hero-actions">
-            <a class="button button-gold" href="#danismanlik">
-              Danışmanlığı keşfet <span aria-hidden="true">↗</span>
-            </a>
-            <a class="text-link" href="#lumen">
-              Lumen’i tanı <span aria-hidden="true">→</span>
-            </a>
+            <a class="button lumen-trigger" href="#lumen">Lumen’i tanı</a>
           </div>
         </div>
 
@@ -1514,6 +1544,32 @@
   </footer>
 
   <script>
+    const introduction = document.querySelector('#lumen');
+    const introDialog = document.createElement('dialog');
+    if (typeof introDialog.showModal === 'function') {
+      introDialog.className = 'lumen-dialog';
+      introDialog.id = 'lumen-dialog';
+      introDialog.setAttribute('aria-labelledby', 'intro-title');
+      introDialog.innerHTML = '<form method="dialog"><button type="submit">Kapat</button></form>';
+      introduction.before(introDialog);
+      introDialog.append(introduction);
+      document.querySelectorAll('a[href="#lumen"]').forEach(link => {
+        link.setAttribute('aria-haspopup', 'dialog');
+        link.setAttribute('aria-controls', introDialog.id);
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          introDialog.showModal();
+        });
+      });
+      introDialog.addEventListener('click', event => {
+        if (event.target !== introDialog) return;
+        const box = introDialog.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right ||
+            event.clientY < box.top || event.clientY > box.bottom) introDialog.close();
+      });
+      if (location.hash === '#lumen') introDialog.showModal();
+    }
+
     const svgNS = 'http://www.w3.org/2000/svg';
     const marks = document.querySelector('#wheel-marks');
     const signs = document.querySelector('#wheel-signs');
